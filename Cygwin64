@@ -1,0 +1,108 @@
+Cygwin 4.19. Why don't international (Unicode) characters work? 
+
+# ~/.inputrc
+set meta-flag on 
+set convert-meta off 
+set output-meta on 
+set input-meta on
+
+"\e[2~": paste-from-clipboard
+---------------------------------------------------------------------------------------------------------------------------------------------
+# ~./.profile
+export LD_LIBRARY_PATH=/usr/local/lib
+
+# Depending on system, LIBRARY_PATH shall not be set - 
+export LIBRARY_PATH=/usr/local/lib
+export CPATH=/usr/local/include
+PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:/cygdrive/c/WINDOWS/system32:/cygdrive/c/WINDOWS:/cygdrive/c/bin
+
+# Determine windows path
+W=`pwd -W`
+
+# Determine identifying version info
+V=`echo -n \`uname -r | cut -d \( -f 1\`-\`uname -v | sed -e 's/ /@/'\``
+
+# Reset bash prompt
+export PS1='\[\033]0;$MSYSTEM-$V($W):\w\007\033[47m\033[30m\]\u@\h \[\033[47m\033[35m\w\033[0m\]$ '
+---------------------------------------------------------------------------------------------------------------------------------------------
+# ~/.bash_aliases
+#:
+alias less='/bin/less -r' 
+alias ls='/bin/ls -F --color=tty --show-control-chars'
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+mount -X -b -f c:\cygwin\bin /bin
+mount -X -b -f c:\cygwin\bin /usr/bin
+mount -x -b -f c:\cygwin\bin\tclsh84.exe /usr/bin/tclsh84.exe
+mount -x -b -f c:\cygwin\bin\tclsh84.exe /bin/tclsh84.exe
+mount -x -b -f c:\cygwin\bin\wish84.exe /usr/bin/wish84.exe
+mount -x -b -f c:\cygwin\bin\wish84.exe /bin/wish84.exe
+
+Note that if you have Tcl/Tk installed, you must specifically exclude tclsh84 and wish84, which are linked to the Cygwin DLL but are not actually Cygwin programs. If you have added other non-Cygwin programs to a path you want to mount cygexec, you can find them with a script like this:
+
+#!/bin/sh
+cd /bin; for f in `find . -type f -name '*.exe'`; do
+       cygcheck $f | (fgrep -qi cygwin1.dll || echo $f)
+done
+
+--------------------------------------------------------------------------------------------------------------
+@echo off
+
+set MINGWDIR=C:bin\\MinGW
+set MSYSDIR=%MINGWDIR%\msys\1.0
+
+rem set HOME=%USERPROFILE%
+set HOME=%MSYSDIR%\home\%USERNAME%
+set PATH=%PATH%;%MINGWDIR%\bin;%MSYSDIR%\bin
+
+rem Useful doskey macros
+%SYSTEMROOT%\System32\doskey.exe ^D=exit
+%SYSTEMROOT%\System32\doskey.exe ll=ls -l $*
+%SYSTEMROOT%\System32\doskey.exe vi=vim -N $*
+%SYSTEMROOT%\System32\doskey.exe which=sh -c "which $"
+
+\cygwin\etc\minttyrc
+BoldAsFont=no
+FontHeight=10
+ForegroundColour=208,208,208
+BackgroundColour=28,28,28
+CursorColour=255,175,0
+IMECursorColour=128,224,160
+Black=12,12,12
+BoldBlack=10,10,10
+Red=245,135,135
+BoldRed=253,135,135
+Green=175,245,135
+BoldGreen=175,243,135
+Yellow=247,247,175
+BoldYellow=255,255,175
+Blue=135,175,245
+BoldBlue=135,175,253
+Magenta=215,175,215
+BoldMagenta=223,175,223
+Cyan=175,215,215
+BoldCyan=175,223,223
+White=250,250,250
+BoldWhite=255,255,255
+Transparency=off
+OpaqueWhenFocused=no
+CursorType=line
+CursorBlinks=yes
+FontSmoothing=full
+Locale=en_US
+Charset=UTF-8
+ScrollbackLines=99000
+ScrollMod=shift
+PgUpDnScroll=yes
+Term=xterm-256color
+CopyAsRTF=no
+RightClickAction=paste
+
+For the Solarized fans there’s already a light and dark configuration file available on the world-wide web.
+Another must-have is the zsh-syntax-highlighting plugin:
+
+cd ~/.oh-my-zsh/custom/plugins
+git clone git://github.com/zsh-users/zsh-syntax-highlighting.git
+plugins=(svn zsh-syntax-highlighting)
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets) 
+.
